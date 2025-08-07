@@ -23,11 +23,14 @@
 
 ## Overview
 
+>[!TIP]
+> In the demo site, click the Load Demo button to automatically paste in a sample tf config.
+
 This is a very quick feature prototype I put together for an application to Antimetal. I know they have a cost optimization feature but I needed something I could do in less than 24 hours and possibly integrate into the IDE. I ended up building a very simple Terraform parser that takes configs, parses out resources, hits the AWS Pricing API, and returns rough cost (assuming 730 hours / month). 
 
 If I had time, there are many many filters I'd add into this - region, timing, estimated storage needs, data flows, etc. So many things go into infra pricing that its a bit Quixotic to try and account for it all, but there are high-impact things you can surface for users: historical pricing, how config changes affect cost over time, assumptions baked into *THEIR* config files (show them assumptions they might not have thought about), cutting through complexity of AWS services, etc.
 
-The optimizations feature uses pre-configured recommendations - none of those are dynamic because I didn't have the time. 
+The optimizations feature uses pre-written recommendations but as I'm sure you figured out when building your own feature, you can do things like see what's on a savings plan and what isn't, then offer RIs for non-savings plan resources. I didn't even get into bidding on spot instances but there are lots of savings to be had there. 
 
 Another important thing to note - I did very little of the UI tweaking for this (it's almost entirely shadcn) and had Claude generate a lot of the sample data and things like the Terraform to AWS service map. I wrote quite a bit of the parser and API myself but had claude do the tedious things. 
 

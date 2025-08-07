@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/header.png" alt="Antimetal logo on a white background" />
+  <img src="./public/terraform-aws.avif" alt="Logos for Terraform and AWS on a dark background" />
 </p>
 <h1 align="center"><i>Terraform AWS Cost Estimator</i></h1>
 
@@ -26,7 +26,7 @@
 >[!TIP]
 > In the demo site, click the Load Demo button to automatically paste in a sample tf config.
 
-This is a very quick feature prototype I put together for an application to Antimetal. I know they have a cost optimization feature but I needed something I could do in less than 24 hours and possibly integrate into the IDE. I ended up building a very simple Terraform parser that takes configs, parses out resources, hits the AWS Pricing API, and returns rough cost (assuming 730 hours / month). 
+This is a very quick feature prototype I put together for an application to a really cool company I'd love to work for. I know they have a cost optimization feature but I needed something I could do in less than 24 hours and possibly integrate into the IDE. I ended up building a very simple Terraform parser that takes configs, parses out resources, hits the AWS Pricing API, and returns rough cost (assuming 730 hours / month). 
 
 If I had time, there are many many filters I'd add into this - region, timing, estimated storage needs, data flows, etc. So many things go into infra pricing that its a bit Quixotic to try and account for it all, but there are high-impact things you can surface for users: historical pricing, how config changes affect cost over time, assumptions baked into *THEIR* config files (show them assumptions they might not have thought about), cutting through complexity of AWS services, etc.
 
@@ -47,8 +47,8 @@ Another important thing to note - I did very little of the UI tweaking for this 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/antimetal-pitch
-cd antimetal-pitch
+git clone https://github.com/Nostromos/terraform-cost-estimator
+cd terraform-cost-estimator
 
 # Install dependencies
 npm install

@@ -32,6 +32,17 @@ export function CostRecommendations({ resources }: CostRecommendationsProps) {
           })
         }
 
+        // Recommend Graviton instances for cost savings
+        if (resource.specs.instanceType?.match(/^(m5|r5|c5|t3)/)) {
+          const gravitonType = resource.specs.instanceType.replace(/^(m5|r5|c5)/, '$1g').replace('t3', 't4g')
+          recommendations.push({
+            type: 'optimization',
+            title: `Consider Graviton instance for ${resource.name}`,
+            description: `Switch to ${gravitonType} (ARM-based Graviton) for up to 40% better price-performance`,
+            savings: 'Up to 40%'
+          })
+        }
+
         // Check for gp2 volumes
         if (resource.specs.storage?.type === 'gp2') {
           recommendations.push({
@@ -42,11 +53,31 @@ export function CostRecommendations({ resources }: CostRecommendationsProps) {
           })
         }
 
+        // Right-sizing based on instance type
+        if (resource.specs.instanceType?.includes('xlarge') && !resource.specs.instanceType?.includes('.large')) {
+          recommendations.push({
+            type: 'info',
+            title: `Review instance size for ${resource.name}`,
+            description: 'Monitor CPU and memory utilization to identify right-sizing opportunities',
+            savings: 'Varies'
+          })
+        }
+
+        // Spot instances for worker nodes
+        if (resource.name?.toLowerCase().includes('worker') || resource.resourceType?.includes('autoscaling')) {
+          recommendations.push({
+            type: 'optimization',
+            title: `Use Spot Instances for ${resource.name}`,
+            description: 'For fault-tolerant workloads, Spot Instances can save up to 90%',
+            savings: 'Up to 90%'
+          })
+        }
+
         // Large instance without reserved pricing
         if (resource.specs.instanceType?.includes('large')) {
           recommendations.push({
             type: 'info',
-            title: 'Consider Reserved Instances',
+            title: 'Consider Reserved Instances or Savings Plans',
             description: `For long-running instances like ${resource.name}, Reserved Instances can save up to 72%`,
             savings: 'Up to 72%'
           })
@@ -67,21 +98,167 @@ export function CostRecommendations({ resources }: CostRecommendationsProps) {
         if (resource.specs.engine === 'mysql' || resource.specs.engine === 'postgres') {
           recommendations.push({
             type: 'info',
-            title: 'Consider Aurora Serverless',
-            description: `For variable workloads, Aurora Serverless v2 can reduce costs by auto-scaling`,
+            title: 'Consider Aurora Serverless v2',
+            description: `For variable workloads, Aurora Serverless v2 can reduce costs by auto-scaling capacity`,
+            savings: '40-90%'
+          })
+        }
+
+        // Storage optimization for RDS
+        if (resource.specs.allocatedStorage > 100) {
+          recommendations.push({
+            type: 'optimization',
+            title: 'Enable RDS storage auto-scaling',
+            description: 'Start with lower storage and let RDS auto-scale as needed to avoid over-provisioning',
+            savings: '~20%'
+          })
+        }
+
+        // Reserved instances for RDS
+        recommendations.push({
+          type: 'optimization',
+          title: `Consider Reserved Instances for ${resource.name}`,
+          description: 'RDS Reserved Instances can provide up to 69% discount for 1 or 3 year commitments',
+          savings: 'Up to 69%'
+        })
+      }
+
+      if (resource.type === 'S3' && resource.specs) {
+        // Storage class optimization
+        if (resource.specs.estimatedStorage > 100) {
+          recommendations.push({
+            type: 'optimization',
+            title: 'Implement S3 Intelligent-Tiering',
+            description: 'Automatically moves objects between access tiers based on usage patterns',
+            savings: 'Up to 70%'
+          })
+        }
+
+        // Lifecycle policies
+        if (resource.specs.estimatedStorage > 500) {
+          recommendations.push({
+            type: 'optimization',
+            title: 'Configure S3 Lifecycle policies',
+            description: 'Archive old data to Glacier/Deep Archive for up to 95% savings',
+            savings: 'Up to 95%'
+          })
+        }
+
+        // Check for backup buckets
+        if (resource.name?.toLowerCase().includes('backup')) {
+          recommendations.push({
+            type: 'optimization',
+            title: 'Use S3 Glacier for backups',
+            description: 'Glacier Instant Retrieval offers 68% lower cost than S3 Standard for backup data',
+            savings: '~68%'
           })
         }
       }
 
-      if (resource.type === 'S3' && resource.specs) {
-        if (resource.specs.estimatedStorage > 500) {
+      // Lambda optimization
+      if (resource.type === 'Lambda' && resource.specs) {
+        if (resource.specs.memorySize > 1024) {
           recommendations.push({
             type: 'optimization',
-            title: 'Consider S3 storage classes',
-            description: 'For infrequently accessed data, use S3 IA or Glacier for up to 95% savings',
-            savings: 'Up to 95%'
+            title: `Optimize Lambda memory for ${resource.name}`,
+            description: 'Use AWS Lambda Power Tuning to find the optimal memory/cost configuration',
+            savings: '10-50%'
           })
         }
+
+        recommendations.push({
+          type: 'info',
+          title: 'Consider Lambda@Edge caching',
+          description: 'For global functions, Lambda@Edge with CloudFront can reduce invocations',
+          savings: 'Varies'
+        })
+      }
+
+      // DynamoDB optimization
+      if (resource.type === 'DynamoDB' && resource.specs) {
+        if (resource.specs.billingMode === 'PROVISIONED' && resource.specs.readCapacity) {
+          recommendations.push({
+            type: 'optimization',
+            title: 'Consider DynamoDB On-Demand',
+            description: 'For unpredictable workloads, on-demand can be more cost-effective',
+            savings: 'Varies'
+          })
+        }
+
+        if (resource.specs.billingMode === 'PAY_PER_REQUEST') {
+          recommendations.push({
+            type: 'info',
+            title: 'Review DynamoDB usage patterns',
+            description: 'For consistent workloads, provisioned capacity with auto-scaling may be cheaper',
+            savings: 'Up to 70%'
+          })
+        }
+
+        recommendations.push({
+          type: 'optimization',
+          title: 'Enable DynamoDB TTL',
+          description: 'Automatically delete expired items to reduce storage costs',
+          savings: '~10%'
+        })
+      }
+
+      // ElastiCache optimization
+      if (resource.resourceType === 'aws_elasticache_replication_group' || resource.resourceType === 'aws_elasticache_cluster') {
+        recommendations.push({
+          type: 'optimization',
+          title: `Reserve capacity for ${resource.name}`,
+          description: 'ElastiCache Reserved Nodes offer up to 55% discount',
+          savings: 'Up to 55%'
+        })
+
+        if (resource.specs?.nodeType?.includes('cache.r')) {
+          recommendations.push({
+            type: 'info',
+            title: 'Review cache node type',
+            description: 'Consider cache.m instances if memory optimization is not critical',
+            savings: '~20%'
+          })
+        }
+      }
+
+      // ECS/Fargate optimization
+      if (resource.resourceType === 'aws_ecs_service') {
+        recommendations.push({
+          type: 'optimization',
+          title: 'Use Fargate Spot for non-critical tasks',
+          description: 'Fargate Spot offers up to 70% discount for interruptible workloads',
+          savings: 'Up to 70%'
+        })
+      }
+
+      // NAT Gateway optimization
+      if (resource.resourceType === 'aws_nat_gateway') {
+        recommendations.push({
+          type: 'optimization',
+          title: 'Consider NAT Instance for non-production',
+          description: 'NAT Instances can be 50-75% cheaper than NAT Gateways for low-traffic environments',
+          savings: '50-75%'
+        })
+      }
+
+      // Load Balancer optimization
+      if (resource.resourceType === 'aws_lb' || resource.resourceType === 'aws_alb' || resource.resourceType === 'aws_elb') {
+        recommendations.push({
+          type: 'info',
+          title: 'Optimize load balancer configuration',
+          description: 'Consider connection draining, idle timeout, and cross-zone load balancing settings',
+          savings: '~10%'
+        })
+      }
+
+      // CloudFront optimization
+      if (resource.resourceType === 'aws_cloudfront_distribution') {
+        recommendations.push({
+          type: 'optimization',
+          title: 'Optimize CloudFront caching',
+          description: 'Increase cache TTLs and use Origin Shield to reduce origin requests',
+          savings: '20-40%'
+        })
       }
     })
 

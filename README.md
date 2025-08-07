@@ -1,7 +1,7 @@
 <p align="center">
   <img src="./public/terraform-aws.avif" alt="Logos for Terraform and AWS on a dark background" />
 </p>
-<h1 align="center"><i>Terraform AWS Cost Estimator</i></h1>
+<h1 align="center"><i>Terratally</i></h1>
 
 <p align="center">
   <a>
@@ -47,8 +47,8 @@ Another important thing to note - I did very little of the UI tweaking for this 
 
 ```bash
 # Clone the repository
-git clone https://github.com/Nostromos/terraform-cost-estimator
-cd terraform-cost-estimator
+git clone https://github.com/Nostromos/terratally
+cd terratally
 
 # Install dependencies
 npm install

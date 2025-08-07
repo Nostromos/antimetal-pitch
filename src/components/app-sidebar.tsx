@@ -32,12 +32,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
 
 const data = {
   user: {
     name: "Shreyas",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    email: "shreyas@antimetal.com",
+    avatar: "/shreyas.jpeg",
   },
   navMain: [
     {
@@ -62,7 +63,7 @@ const data = {
     },
     {
       title: "Cost Estimator",
-      url: "#",
+      url: "/",
       icon: IconUsers,
     },
   ],
@@ -161,8 +162,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <Image src="/logo.svg" className="!size-5" width={50} height={50} alt="Antimetal logo" />
+                <span className="text-base font-semibold">Antimetal</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -170,8 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navClouds} />
+        {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
